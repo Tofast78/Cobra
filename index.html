@@ -2,32 +2,15 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Jogo da Cobra</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jogo da Cobra </title>
 <style>
-  body {
-    font-family: sans-serif;
-    text-align: center;
-    background: #222;
-    color: white;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-  }
-  #gameCanvas {
-    background: #000;
-    display: block;
-    margin: 10px auto;
-    width: 90vw;    /* ocupa 90% da largura do ecrã */
-    height: 90vw;   /* quadrado */
-    max-width: 400px;
-    max-height: 400px;
-    touch-action: none;
-  }
+  body { font-family: sans-serif; text-align: center; background: #222; color: white; margin:0; padding:0;}
+  #gameCanvas { background: #000; display: block; margin: 20px auto; }
+  /* Estilo dos botões do cursor */
   #controls {
-    width: 100%;
-    max-width: 250px;
-    margin: 15px auto;
+    width: 200px;
+    margin: 10px auto 30px;
     user-select: none;
   }
   #controls > div {
@@ -38,24 +21,27 @@
     background: #444;
     border: none;
     color: white;
-    font-size: 28px;
-    padding: 14px;
-    margin: 6px;
-    border-radius: 10px;
+    font-size: 24px;
+    padding: 10px 16px;
+    margin: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    width: 70px;
-    height: 70px;
+    user-select: none;
+    width: 50px;
+    height: 50px;
+    line-height: 1;
   }
   button:active {
     background: #666;
   }
-  #up { margin-left: 80px; }
+  /* Layout direcional */
+  #up { margin-left: 58px; }
   #left, #right { flex: 1; }
-  #down { margin-left: 80px; }
+  #down { margin-left: 58px; }
 </style>
 </head>
 <body>
-  <h1>Jogo da Cobra</h1>
+  <h1>Jogo da Cobra </h1>
 
   <canvas id="gameCanvas" width="400" height="400"></canvas>
 
@@ -69,68 +55,28 @@
   </div>
 
   <div id="info">
-    <p>Toque nos botões ou use o teclado para jogar.</p>
+    <p>Use as setas do teclado ou os botões para jogar.</p>
+    <p>Cobra cresce com a imagem da comida.</p>
   </div>
 
 <script>
 (() => {
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
-  const gridSize = 20;
-  const tileCount = 20; // quadrícula 20x20
-  canvas.width = gridSize * tileCount;
-  canvas.height = gridSize * tileCount;
 
-  function createDefaultImage(color) {
-    const c = document.createElement('canvas');
-    c.width = c.height = gridSize;
-    const cx = c.getContext('2d');
-    cx.fillStyle = color;
-    cx.fillRect(0, 0, gridSize, gridSize);
-    return c;
-  }
+  const gridSize = 40;
+  const tileCount = canvas.width / gridSize;
 
-  function loadImage(url, fallbackColor) {
-    return new Promise(resolve => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => resolve(createDefaultImage(fallbackColor));
-      img.src = url + (url.includes("?") ? "&" : "?") + "t=" + Date.now();
-    });
-  }
+  let headImg = new Image();
+  headImg.src = "https://raw.githubusercontent.com/Tofast78/Cobra/c144bcafbf8d6cbbc38193270c57abaaef1e0a98/assa_van.jpg";
 
-  const HEAD_URL = "https://raw.githubusercontent.com/Tofast78/Cobra/c144bcafbf8d6cbbc38193270c57abaaef1e0a98/assa_van.jpg";
-  const FOOD_URL = "https://raw.githubusercontent.com/Tofast78/Cobra/c144bcafbf8d6cbbc38193270c57abaaef1e0a98/roller_cobra.jpg";
+  let foodImg = new Image();
+  foodImg.src = "https://raw.githubusercontent.com/Tofast78/Cobra/c144bcafbf8d6cbbc38193270c57abaaef1e0a98/roller_cobra.jpg";
 
-  let headImg, foodImg;
-
-  ctx.fillStyle = "#888";
-  ctx.font = "16px sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("A carregar imagens...", canvas.width / 2, canvas.height / 2);
-
-  Promise.all([
-    loadImage(HEAD_URL, "lime"),
-    loadImage(FOOD_URL, "red")
-  ]).then(([hImg, fImg]) => {
-    headImg = hImg;
-    foodImg = fImg;
-    startGame();
-  });
-
-  let snake, snakeDir, food;
-
-  function startGame() {
-    resetGame();
-    setInterval(update, 150);
-  }
-
-  function resetGame() {
-    snake = [{x:10, y:10}];
-    snakeDir = {x:0, y:0};
-    placeFood();
-    draw();
-  }
+  let snake = [{x:10, y:10}];
+  let snakeDir = {x:0, y:0};
+  let food = {x:5, y:5};
+  let snakeBodyImgs = [];
 
   function placeFood() {
     let x, y;
@@ -143,26 +89,45 @@
 
   window.addEventListener('keydown', e => {
     switch(e.key) {
-      case 'ArrowUp':    if (snakeDir.y !== 1) snakeDir = {x:0, y:-1}; break;
-      case 'ArrowDown':  if (snakeDir.y !== -1) snakeDir = {x:0, y:1};  break;
-      case 'ArrowLeft':  if (snakeDir.x !== 1) snakeDir = {x:-1, y:0}; break;
-      case 'ArrowRight': if (snakeDir.x !== -1) snakeDir = {x:1, y:0};  break;
+      case 'ArrowUp':
+        if (snakeDir.y !== 1) snakeDir = {x:0, y:-1};
+        break;
+      case 'ArrowDown':
+        if (snakeDir.y !== -1) snakeDir = {x:0, y:1};
+        break;
+      case 'ArrowLeft':
+        if (snakeDir.x !== 1) snakeDir = {x:-1, y:0};
+        break;
+      case 'ArrowRight':
+        if (snakeDir.x !== -1) snakeDir = {x:1, y:0};
+        break;
     }
   });
 
-  // Controlo mobile
-  document.getElementById('up').addEventListener('touchstart', e => { e.preventDefault(); if (snakeDir.y !== 1) snakeDir = {x:0, y:-1}; });
-  document.getElementById('down').addEventListener('touchstart', e => { e.preventDefault(); if (snakeDir.y !== -1) snakeDir = {x:0, y:1}; });
-  document.getElementById('left').addEventListener('touchstart', e => { e.preventDefault(); if (snakeDir.x !== 1) snakeDir = {x:-1, y:0}; });
-  document.getElementById('right').addEventListener('touchstart', e => { e.preventDefault(); if (snakeDir.x !== -1) snakeDir = {x:1, y:0}; });
+  document.getElementById('up').addEventListener('click', () => {
+    if (snakeDir.y !== 1) snakeDir = {x:0, y:-1};
+  });
+  document.getElementById('down').addEventListener('click', () => {
+    if (snakeDir.y !== -1) snakeDir = {x:0, y:1};
+  });
+  document.getElementById('left').addEventListener('click', () => {
+    if (snakeDir.x !== 1) snakeDir = {x:-1, y:0};
+  });
+  document.getElementById('right').addEventListener('click', () => {
+    if (snakeDir.x !== -1) snakeDir = {x:1, y:0};
+  });
 
   function update() {
-    if (snakeDir.x === 0 && snakeDir.y === 0) { draw(); return; }
+    if (snakeDir.x === 0 && snakeDir.y === 0) {
+      draw();
+      return;
+    }
+    let head = {x: snake[0].x + snakeDir.x, y: snake[0].y + snakeDir.y};
 
-    const head = {
-      x: (snake[0].x + snakeDir.x + tileCount) % tileCount,
-      y: (snake[0].y + snakeDir.y + tileCount) % tileCount
-    };
+    if (head.x < 0) head.x = tileCount - 1;
+    else if (head.x >= tileCount) head.x = 0;
+    if (head.y < 0) head.y = tileCount - 1;
+    else if (head.y >= tileCount) head.y = 0;
 
     if (snake.some(s => s.x === head.x && s.y === head.y)) {
       resetGame();
@@ -172,27 +137,49 @@
     snake.unshift(head);
 
     if (head.x === food.x && head.y === food.y) {
+      snakeBodyImgs.push(foodImg);
       placeFood();
     } else {
       snake.pop();
+      snakeBodyImgs.pop();
     }
 
     draw();
   }
 
   function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.drawImage(foodImg, food.x * gridSize, food.y * gridSize, gridSize, gridSize);
-
-    for (let i = 1; i < snake.length; i++) {
-      const s = snake[i];
-      ctx.drawImage(foodImg, s.x * gridSize, s.y * gridSize, gridSize, gridSize);
+    for (let i = snake.length - 1; i > 0; i--) {
+      let segment = snake[i];
+      ctx.drawImage(foodImg, segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
     }
-
-    const h = snake[0];
-    ctx.drawImage(headImg, h.x * gridSize, h.y * gridSize, gridSize, gridSize);
+    let head = snake[0];
+    ctx.drawImage(headImg, head.x * gridSize, head.y * gridSize, gridSize, gridSize);
   }
+
+  function resetGame() {
+    snake = [{x:10, y:10}];
+    snakeDir = {x:0, y:0};
+    snakeBodyImgs = [];
+    placeFood();
+  }
+
+  resetGame();
+  setInterval(update, 125);
 })();
 </script>
+
+<!-- Contador de visitas -->
+<div style="margin-top:20px;">
+  <a href="https://es.web-counter.net" title="contador de visitas">
+    <img src="https://www.web-counter.net/count_20091204.php?c=bYliCMnxks5" style="border:0;padding:0;margin:0;" alt="contador de visitas">
+  </a><br/>
+  <font size="1" face="Arial">
+    <a href="https://tr.web-counter.net" title="Sayaç">Sayaç</a><br/>
+    <a href="https://es.web-counter.net" title="contador de visitas">contador de visitas</a>
+  </font>
+</div>
+
 </body>
 </html>
