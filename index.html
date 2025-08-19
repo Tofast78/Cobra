@@ -28,15 +28,20 @@
     max-width: 400px;
     max-height: 400px;
   }
-  #controls {
-    width: 40vw;
-    max-width: 40px;
-    margin: 20px auto 40px;
-    display: grid;
-    grid-template-areas: 
-      "      up       "
-      "left down right";
-    gap: 10px;
+ #controls {
+  width: 90vw;
+  max-width: 300px; /* aumenta espaço total */
+  margin: 20px auto 40px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 10px;
+}
+
+#up    { grid-column: 2; grid-row: 1; }
+#left  { grid-column: 1; grid-row: 2; }
+#down  { grid-column: 2; grid-row: 2; }
+#right { grid-column: 3; grid-row: 2; }
   }
   #up { grid-area: up; }
   #left { grid-area: left; }
@@ -194,6 +199,7 @@
 
 </body>
 </html>
+
 
 
 
