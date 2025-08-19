@@ -28,38 +28,32 @@
     max-width: 400px;
     max-height: 400px;
   }
- #controls {
-  width: 90vw;
-  max-width: 300px; /* aumenta espaço total */
-  margin: 20px auto 40px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 10px;
-}
-
-#up    { grid-column: 2; grid-row: 1; }
-#left  { grid-column: 1; grid-row: 2; }
-#down  { grid-column: 2; grid-row: 2; }
-#right { grid-column: 3; grid-row: 2; }
+  /* --- CONTROLES --- */
+  #controls {
+    width: 90vw;
+    max-width: 300px;
+    margin: 20px auto 40px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 10px;
   }
-  #up { grid-area: up; }
-  #left { grid-area: left; }
-  #down { grid-area: down; }
-  #right { grid-area: right; }
+  #up    { grid-column: 2; grid-row: 1; }
+  #left  { grid-column: 1; grid-row: 2; }
+  #down  { grid-column: 2; grid-row: 2; }
+  #right { grid-column: 3; grid-row: 2; }
 
   button {
     background: #00a1e0;
     border: none;
     color: #fff;
     font-size: 24px;
-    padding: 15px;
     border-radius: 12px;
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     transition: all 0.2s ease-in-out;
     width: 100%;
-    aspect-ratio: 1/1;
+    aspect-ratio: 1/1; /* garante que sejam quadrados */
   }
   button:active {
     transform: scale(0.95);
@@ -99,7 +93,7 @@
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
 
-  const gridCount = 10; // Ajusta para o tamanho do canvas
+  const gridCount = 10;
   let gridSize;
 
   function resizeCanvas() {
@@ -120,7 +114,6 @@
   let snake = [{x:5, y:5}];
   let snakeDir = {x:0, y:0};
   let food = {x:2, y:2};
-  let snakeBodyImgs = [];
 
   function placeFood() {
     let x, y;
@@ -143,11 +136,9 @@
     snake.unshift(head);
 
     if (head.x === food.x && head.y === food.y) {
-      snakeBodyImgs.push(foodImg);
       placeFood();
     } else {
       snake.pop();
-      snakeBodyImgs.pop();
     }
 
     draw();
@@ -166,7 +157,6 @@
   function resetGame() {
     snake = [{x:5, y:5}];
     snakeDir = {x:0, y:0};
-    snakeBodyImgs = [];
     placeFood();
   }
 
@@ -199,8 +189,3 @@
 
 </body>
 </html>
-
-
-
-
-
